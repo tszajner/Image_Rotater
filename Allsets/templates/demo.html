@@ -1,0 +1,13 @@
+<form action="/demo" method="POST">
+<input name="url">
+<input name="rotation">
+<input type="submit" value="Demo!">
+</form>
+ 
+{% if url %}
+  Results for:  {{ url }} and {{ rotation }}
+	<br>
+	<img src={{ rotated }}>
+	<br>
+	<img src={{ derotated }}>
+{% endif %}

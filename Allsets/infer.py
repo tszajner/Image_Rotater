@@ -12,8 +12,13 @@ import scipy
 import numpy as np
 import argparse
 
+import os
+from glob import glob
+import pprint
+
+path = '/root/sharedfolder/ImageRotater/testing/*'
 parser = argparse.ArgumentParser(description='Decide if an image of a face is rotated by (90, 180, 270) degrees')
-parser.add_argument('image', type=str, help='The image image file to check')
+parser.add_argument('--image', type=str, help='The image image file to check')
 args = parser.parse_args()
 
 image_size=32
@@ -44,21 +49,45 @@ network = regression(network, optimizer='adam',
 
 model = tflearn.DNN(network, checkpoint_path='AllData.tflearn', max_checkpoints = 3,
                     tensorboard_verbose = 3, tensorboard_dir='tmp/tflearn_logs/')
-model.load("AllData.tflearn-32400")
+model.load("AllData_final.tflearn")
 
-# Load the image file
-img = scipy.ndimage.imread(args.image, mode="RGB")
-img_180 = scipy.misc.imrotate(img, 180, interp="bicubic")
+# Load the image(s)
+pics =[]
+if args.image:
+	pics = [args.image]
+else:
+	pics += sorted(glob(path))
 
-# Scale it 
-img = scipy.misc.imresize(img, (image_size, image_size), interp="bicubic").astype(np.float32, casting='unsafe')
-img_180 = scipy.misc.imresize(img_180, (image_size, image_size), interp="bicubic").astype(np.float32, casting='unsafe')
+for pic in pics:
+	print (pic)
+	img = scipy.ndimage.imread(pic, mode="RGB")
+	#img_180 = scipy.misc.imrotate(img, 180, interp="bicubic")
 
-# Predict
-prediction = model.predict([img])
-print(prediction)
+	# Scale it 
+	#img = scipy.misc.imresize(img, (image_size, image_size), interp="bicubic").astype(np.float32, casting='unsafe')
+	#img_180 = scipy.misc.imresize(img_180, (image_size, image_size), interp="bicubic").astype(np.float32, casting='unsafe')
 
-# Check the result.
-rotation  = np.argmax(prediction[0]) 
+	# Predict
+	#prediction = model.predict([img_180])
+	#print(prediction)
+	prediction = [[] for i in range(4)]
+	max_val = 0
+	row = 0
+	for i in range(4):
+		test_img = scipy.misc.imrotate(img, (i*90), interp="bicubic")
+		test_img = scipy.misc.imresize(test_img, (image_size, image_size), interp="bicubic").astype(np.float32, casting='unsafe')
+		prediction[i] = model.predict([test_img])
+		#print(max(prediction[i][0]))
+		if (max(prediction[i][0]) > max_val):
+			row = i
+			max_val = max(prediction[i][0])
+	
+	#pprint.pprint (prediction)
+	col = np.argmax(prediction[row][0])
+	
+	#print (prediction[row])
+	#print (np.argmax(prediction[i]))
+	# Check the result.
+	#rotation  = np.argmax(prediction[0]) 
 
-print ("Rotated by %d degrees" % (rotation*90))
+	print ("Rotated by %d degrees" % ((4 + col - row)*90))

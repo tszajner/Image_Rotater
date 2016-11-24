@@ -217,7 +217,10 @@ selected_images = ['lfw/*/*.jpg',
 		'cifar100/coarse/*/vehicles_2/streetcar/*' ,
 		'cifar100/coarse/*/vehicles_2/tank/*' ,
 		'cifar100/coarse/*/vehicles_2/tractor/*' ,
-		'cifar100/coarse/*/vehicles_2/lawn_mower/*' ]
+		'cifar100/coarse/*/vehicles_2/lawn_mower/*',
+		'English/Hnd/Img/*/*',
+		'English/Img/GoodImg/Bmp/*/*' ]
+		
 files = []
 
 for directory in selected_images:
@@ -230,11 +233,11 @@ for directory in selected_images:
 	#print(n_files)
 
 random.shuffle(files)
-#files = files[:75000]
+files = files[:90000]
 n_files = len(files)
 print(n_files)
 
-size_image = 64
+size_image = 32
 
 allX = np.zeros((n_files*4, size_image, size_image, 3), dtype='float32')
 ally = np.zeros(n_files*4)
@@ -243,6 +246,10 @@ for f in files:
     try:
         img = io.imread(f)
         new_img = imresize(img, (size_image, size_image, 3))
+	if random.choice([True, False]):
+		if 'English' not in f: # letters/numbers shouldn't be flipped
+			#print (f)
+			new_img = np.fliplr(new_img)
         allX[count] = np.array(new_img)
         ally[count] = 0
         count += 1
@@ -291,7 +298,10 @@ img_prep.add_featurewise_stdnorm()
 
 # Create extra synthetic training data by flipping & rotating images
 img_aug = ImageAugmentation()
-img_aug.add_random_flip_leftright()
+
+#Lets do this earlier to prevent 90 degree images being represented as 270, and vice-versa
+#img_aug.add_random_flip_leftright()
+
 img_aug.add_random_rotation(max_angle=25.)
 
 ###################################
@@ -341,8 +351,9 @@ model = tflearn.DNN(network, checkpoint_path='AllData.tflearn', max_checkpoints 
 # Train model for 100 epochs
 ###################################
 model.fit(X, Y, validation_set=(X_test, Y_test), batch_size=500,
-      n_epoch=1, run_id='AllData', show_metric=True)
+      n_epoch=100, run_id='AllData', show_metric=True)
 
 model.save('AllData_final.tflearn')
+
 
 
