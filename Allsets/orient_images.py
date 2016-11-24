@@ -1,5 +1,11 @@
 """
-Based on the tflearn CIFAR-10 example at:
+Based Cameron Mence's example at
+http://www.subsubroutine.com/sub-subroutine/2016/9/30/cats-and-dogs-and-convolutional-neural-networks ,
+
+and Adam Geitgey's example at
+https://medium.com/@ageitgey/machine-learning-is-fun-part-3-deep-learning-and-convolutional-neural-networks-f40359318721#.nt77j3ty4 ,
+
+which in turn are both based on the tflearn CIFAR-10 example at:
 https://github.com/tflearn/tflearn/blob/master/examples/images/convnet_cifar10.py
 """
 
