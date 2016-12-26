@@ -11,7 +11,7 @@ https://github.com/tflearn/tflearn/blob/master/examples/images/convnet_cifar10.p
 
 from __future__ import division, print_function, absolute_import
 
-from skimage import color, io
+from skimage import color, io, img_as_ubyte
 from scipy.misc import imresize, imrotate
 import numpy as np
 from sklearn.cross_validation import train_test_split
@@ -239,7 +239,7 @@ for directory in selected_images:
 	#print(n_files)
 
 random.shuffle(files)
-files = files[:90000]
+files = files[:80000]
 n_files = len(files)
 print(n_files)
 
@@ -251,6 +251,8 @@ count = 0
 for f in files:
     try:
         img = io.imread(f)
+	#img = img_as_uint(img)
+	#img.astype('float32', copy=False)
         new_img = imresize(img, (size_image, size_image, 3))
 	if random.choice([True, False]):
 		if 'English' not in f: # letters/numbers shouldn't be flipped

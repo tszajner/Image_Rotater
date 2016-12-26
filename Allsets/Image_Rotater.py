@@ -16,7 +16,9 @@ import os
 from glob import glob
 import urllib
 import time
+import pprint
 
+import imghdr
 
 
 class Image_Rotater():
@@ -54,7 +56,7 @@ class Image_Rotater():
 		#self.model = tflearn.DNN(network, checkpoint_path='AllData.tflearn', max_checkpoints = 3,
 				    #tensorboard_verbose = 3, tensorboard_dir='tmp/tflearn_logs/')
 		self.model = tflearn.DNN(network)
-		self.model.load("AllData_final.tflearn")
+		self.model.load("Candidates/AllData_final.tflearn_Nov25")
 		
 
 	def predict_rotation(self, img):
@@ -94,23 +96,45 @@ class Image_Rotater():
 	def full_demo(self, url, rotation):
 
 		filename = url.split('/')[-1].split('#')[0].split('?')[0] # get filename and remove queries
+		#if not (filename.lower().endswith(('.png', '.jpg', '.jpeg'))):
+			#filename += imghdr.what(download_path)
 		download_path = "static/" + filename 
-		rotated_path = "static/rotated_" + filename 
-		derotated_path = "static/derotated_" + filename 
+		#rotated_path = "static/rotated_" + filename 
+		#derotated_path = "static/derotated_" + filename 
 
 		if (self.download_image(url, download_path)):
-			self.rotate_image(self.load_image(download_path), rotation, rotated_path)
+			if not (filename.lower().endswith(('.png', '.jpg', '.jpeg'))):
+				filename += "." + imghdr.what(download_path)
 
-			rotation = self.better_predicition(self.load_image(rotated_path))
-			print (rotation)
+			rotated_path = "static/rotated_" + filename 
+			derotated_path = "static/derotated_" + filename 
+			self.rotate_image(self.load_image(download_path), rotation, rotated_path)
+			derotation = self.better_prediction(self.load_image(rotated_path))
+			print (derotation)
 			
 
 			#De-rotate image
-			self.rotate_image(self.load_image(rotated_path), 360 - rotation, derotated_path)
+			self.rotate_image(self.load_image(rotated_path), 360 - derotation, derotated_path)
 		else:
-			Print ("Could not download image")
+			print ("Could not download image")
 
-	def better_predicition(self, img):
+		if (abs(rotation + 360 - derotation) % 360) == 0:
+			print ("I am correct")
+			with open('LIFETIME_SCORE', 'a') as f:
+				f.write("1\n")
+			
+			#SESSION_SCORE will be blanked each time the server starts
+			with open('SESSION_SCORE', 'a') as f: 
+				f.write("1\n")
+		else:
+			print ("I am incorrect")
+			with open('LIFETIME_SCORE', 'a') as f:
+				f.write("0\n")
+			#SESSION_SCORE will be blanked each time the server starts
+			with open('SESSION_SCORE', 'a') as f: 
+				f.write("0\n")
+
+	def better_prediction(self, img):
 
 
 		prediction = [[] for i in range(4)]
@@ -125,7 +149,7 @@ class Image_Rotater():
 				row = i
 				max_val = max(prediction[i][0])
 		
-		#pprint.pprint (prediction)
+		pprint.pprint (prediction)
 		col = np.argmax(prediction[row][0])
 		
 		#print (prediction[row])

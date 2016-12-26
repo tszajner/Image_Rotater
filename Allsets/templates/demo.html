@@ -1,6 +1,11 @@
 <form action="/demo" method="POST">
 <input name="url">
-<input name="rotation">
+<select name="rotation">
+    <option value="0">0°</option>
+    <option value="90">90°</option>
+    <option value="180">180°</option>
+    <option value="270">270°</option>
+</select>
 <input type="submit" value="Demo!">
 </form>
  
@@ -10,4 +15,13 @@
 	<img src={{ rotated }}>
 	<br>
 	<img src={{ derotated }}>
+	<br>
+	<br>
+	<br>
+	<b> Lifetime score of {{ lifetime_score }}% </b>
+	<br>
+	<b> Session score of {{ session_score }}% </b>
 {% endif %}
+
+<br>
+<a href="https://github.com/tszajner/Image_Rotater">Source code</a>
